@@ -34,7 +34,8 @@ int main(){
 	int count = 0; //Se siamo in mod. manuale (per l'assegnazione), dice se è stato assegnato un valore a tutti i campi.
 	int manuale = 0; //Ci dice che tipo di assegnazione stiamo facendo, ovviamente 0 sta per manuale disattivato
 	char *f_stringa;
-	char *argVec[] = {"navi", NULL};
+	char *argVec[] = {"navi", NULL}; //Prova che non serve a nulla. (penso)
+	char *token; //usiamo questa varibiale per puntare la meta stringhe prima dell'uguale es. (SO_NAVI=12) token -> SO_NAVI
 	
 	/*in questo modo possiamo usare 12 cifre dopo l'uguale. (Considerando la stringa più lunga)*/
 	char parametro[16][30] = {"SO_NAVI=", "SO_PORTI=", "SO_MERCI=", "SO_SIZE=", "SO_MIN_VITA=", "SO_MAX_VITA=", "SO_LATO=", "SO_SPEED=", "SO_CAPACITY=", "SO_BANCHINE=", "SO_FILL=", "SO_LOADSPPED=", "SO_DAYS=", "SO_STORM_DURATION=", "SO_SWELL_DURATION=", "SO_MAELSTROM="};
@@ -90,7 +91,7 @@ int main(){
 	else if(strcmp(buffer, "unlucky cargos")==0)
 		scelta = 4;
 
-	printf("All'interno del buffer c'è: %s\n", buffer);
+	printf("All'interno del buffer c'è: %s\n", buffer); ////////// CODICE DEBUGING
 	
 	
 	switch(scelta){
@@ -197,90 +198,86 @@ int main(){
                                         indice++;
                                 }
 				
-				if(buffer[0] == '\0')
+				if(buffer[0] != '\0'){
+					token=strtok(buffer, "=");
 					while(i < 16){
-						if(strcmp(buffer, *(n_parametro+i))==0){
+						if(strcmp(token, *(n_parametro+i))==0){
+							printf("oh no\n"); ////////// CODICE DEBUGING
 							scelta = i;
 							break; 
-						} /*else if(buffer[0] == '\0'){
-                                                scelta = IGNORE;
-                                                break;
-                                        }*/
+						}
 						i++;
 					}
-				//printf("All'interno del buffer 2 c'è: %s\n", buffer);
+				}
+				printf("All'interno del buffer 2 c'è: %s, scelta: %d\n", buffer, scelta); ////////// CODICE DEBUGING
 
 				switch(scelta){
 					case 0://"SO_NAVI":
-						strcat(parametro[0], fgets(buffer, SIZE, fd));
+						strcat(parametro[0], strtok(NULL, "="));
 						count++;
 						break;
 					case 1://"SO_PORTI":
-						strcat(parametro[1], fgets(buffer, SIZE, fd));
+						strcat(parametro[1], strtok(NULL, "="));
 						count++;
 						break;
 					case 2://"SO_MERCI":
-						strcat(parametro[2], fgets(buffer, SIZE, fd));
+						strcat(parametro[2], strtok(NULL, "="));
 						count++;
 						break;
 					case 3://"SO_SIZE":
-						strcat(parametro[3], fgets(buffer, SIZE, fd));
+						strcat(parametro[3], strtok(NULL, "="));
 						count++;
 						break;
 					case 4://"SO_MIN_VITA":
-						strcat(parametro[4], fgets(buffer, SIZE, fd));
+						strcat(parametro[4], strtok(NULL, "="));
 						count++;
 						break;
 					case 5://"SO_MAX_VITA":
-						strcat(parametro[5], fgets(buffer, SIZE, fd));
+						strcat(parametro[5], strtok(NULL, "="));
 						count++;
 						break;
 					case 6://"SO_LATO":
-						strcat(parametro[6], fgets(buffer, SIZE, fd));
+						strcat(parametro[6], strtok(NULL, "="));
 						count++;
 						break;
 					case 7://"SO_SPEED":
-						strcat(parametro[7], fgets(buffer, SIZE, fd));
+						strcat(parametro[7], strtok(NULL, "="));
 						count++;
 						break;
 					case 8://"SO_CAPACITY":
-						strcat(parametro[8], fgets(buffer, SIZE, fd));
+						strcat(parametro[8], strtok(NULL, "="));
 						count++;
 						break;
 					case 9://"SO_BANCHINE":
-						strcat(parametro[9], fgets(buffer, SIZE, fd));
+						strcat(parametro[9], strtok(NULL, "="));
 						count++;
 						break;
 					case 10://"SO_ FILL":
-						strcat(parametro[10], fgets(buffer, SIZE, fd));
+						strcat(parametro[10], strtok(NULL, "="));
 						count++;
 						break;
 					case 11://"SO_LOADSPEED":
-						strcat(parametro[11], fgets(buffer, SIZE, fd));
+						strcat(parametro[11], strtok(NULL, "="));
 						count++;
 						break;
 					case 12://"SO_DAYS":
-						strcat(parametro[12], fgets(buffer, SIZE, fd));
+						strcat(parametro[12], strtok(NULL, "="));
 						count++;
 						break;
 					case 13://"SO_STORM_DURATION":
-						strcat(parametro[13], fgets(buffer, SIZE, fd));
+						strcat(parametro[13], strtok(NULL, "="));
 						count++;
 						break;
 					case 14://"SO_SWELL_DURATION":
-						strcat(parametro[14], fgets(buffer, SIZE, fd));
+						strcat(parametro[14], strtok(NULL, "="));
 						count++;
 						break;
 					case 15://"SO_MAELSTROM":
-						strcat(parametro[15], fgets(buffer, SIZE, fd));
+						strcat(parametro[15], strtok(NULL, "="));
 						count++;
 						break;
                                         case IGNORE:
                                                 break;
-					default:
-						//errExit("stringa");
-						puts("stringa2");
-						exit(0);
 
 				}
 				scelta = IGNORE; //RI-Inizializiamo la variabile per far leggere la prossima variabile
@@ -289,42 +286,50 @@ int main(){
 			} while(fgets(buffer, SIZE, fd) != NULL);
 			if(manuale && count != 16){
 				//errExit("manuale");
-				puts("manuale");
+				puts("Errore: manuale\n");
 				exit(0);
 
 			}
 	}
-
+	printf("Fine di tutto siiiii\n"); ////////// CODICE DEBUGING
 	fclose(fd);
+	
+	////////// CODICE DEBUGING
+	int inno = 0;
+	while(inno < 16){ 
+		printf("%s\n\n", parametro[inno]);
+                inno++;
+        }
+        //////////////
 	
 	/*puts("Flag");
 	exit(0);*/
 
 	
-	
+	/////////////Da revisionare prima di decomentare.
 	
 	/*Inizio creazione processi nave e porto*/
 
-	for(int i = 0; i < 2; i++){
+	/*for(int i = 0; i < 2; i++){
 		switch (procPid = fork()) {
-			case -1: /* fork() failed */
+			case -1: // fork() failed 
 				//errExit("Fork");
 				puts("Fork");
 				exit(0);
 
-			case 0: /* Ambiente del figlio */
+			case 0: // Ambiente del figlio 
 				if(i == 0){
 					sleep(1);
 					errExec = execve("./esecutivo", argVec, envVec);
 					printf("sono il processo navi, PID: %d\n", getpid());
 					//exit(EXIT_SUCCESS);
 				}
-				/*else if(i == 1){
-					sleep(1);
-					errExec = execve("./valore_variabile_amb.c", argVec, envVec);
-					printf("sono il processo porto, PID: %d\n", getpid());
-					//exit(EXIT_SUCCESS);
-				}*/
+				// else if(i == 1){
+				// 	sleep(1);
+				// 	errExec = execve("./valore_variabile_amb.c", argVec, envVec);
+				// 	printf("sono il processo porto, PID: %d\n", getpid());
+				// 	//exit(EXIT_SUCCESS);
+				// }
 
 				printf("Ci è stato un errore imprevisto durante l'execvel (Master!)\n\n\n\n");
 				if(errExec == -1){ //Errori in caso non partisse l'essecutivo
@@ -349,7 +354,7 @@ int main(){
 
 				break;
 
-			default: /* Ambiente del padre */
+			default: // Ambiente del padre 
 				if(i == 0)
 					procPidN = procPid;
 				else if(i == 1)
@@ -367,6 +372,6 @@ int main(){
 		//errExit("wait");
 
 	printf("Questo è il process id di navi: %d, questo invece di porto: %d e questo è il mio %d\n", procPidN, procPidP, getpid());
-	//wait();
+	//wait();*/
 	exit(EXIT_SUCCESS);
 }
