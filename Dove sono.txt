@@ -1,0 +1,7 @@
+Step 1 - configurazione (completato) -master
+Step 2 - creazione e assegnamento valori Navi
+Step 3 - creazione e assegnamento valori Porti
+Step 4 - implementazione algoritmo navi
+Step 5 - implementazione algoritmo porto
+Step 6 - scambio dati tra processi
+Step 7 - sincronizzazione tra processi
