@@ -1,0 +1,341 @@
+COMPUTATIONAL COMPLEXITY THEORY
+
+Computational complexity theory is  a branch of the theory
+of  computation  in  computer   science  that  focuses  on
+classifying  computational  problems  according  to  their
+inherent  difficulty.  In  this context,  a  computational
+problem is  understood to be  a task that is  in principle
+amenable  to being  solved  by a  computer. Informally,  a
+computational  problem consists  of problem  instances and
+solutions  to   these  problem  instances.   For  example,
+primality testing is the  problem of determining whether a
+given  number  is prime  or  not.  The instances  of  this
+problem  are  natural  numbers,  and the  solution  to  an
+instance is yes or no based on whether the number is prime
+or not. A  problem is regarded as  inherently difficult if
+solving the problem requires  a large amount of resources,
+independent  of the  algorithm  used for  solving it.  The
+theory   formalizes   this   intuition,   by   introducing
+mathematical models of computation to study these problems
+and quantifying  the amount  of resources needed  to solve
+them, such as time  and storage. Other complexity measures
+are also used,  such as the amount  of communication (used
+in  communication complexity),  the number  of gates  in a
+circuit  (used in  circuit complexity)  and the  number of
+processors  (used in  parallel computing).  In particular,
+computational complexity  theory determines  the practical
+limits  on  what  computers  can and  cannot  do.  Closely
+related  fields   in  theoretical  computer   science  are
+analysis  of algorithms  and computability  theory. A  key
+distinction  between computational  complexity theory  and
+analysis of  algorithms is that  the latter is  devoted to
+analyzing the  amount of resources needed  by a particular
+algorithm to  solve a problem,  whereas the former  asks a
+more general  question about all possible  algorithms that
+could be used  to solve the same  problem. More precisely,
+it tries to classify problems that can or cannot be solved
+with appropriately restricted resources. In turn, imposing
+restrictions   on   the   available  resources   is   what
+distinguishes computational  complexity from computability
+theory: the latter  theory asks what kind  of problems can
+be      solved      in     principle      algorithmically.
+
+Problem instances
+
+A  computational  problem can  be  viewed  as an  infinite
+collection of instances together with a solution for every
+instance. The input string  for a computational problem is
+referred  to as  a  problem instance,  and  should not  be
+confused  with   the  problem  itself.   In  computational
+complexity  theory,  a  problem  refers  to  the  abstract
+question to  be solved. In  contrast, an instance  of this
+problem is a rather concrete utterance, which can serve as
+the input  for a  decision problem. For  example, consider
+the problem of primality testing. The instance is a number
+and the solution is "yes" if  the number is prime and "no"
+otherwise. Alternately, the instance is a particular input
+to   the  problem,   and  the   solution  is   the  output
+corresponding to the given input. To further highlight the
+difference between a problem and an instance, consider the
+following  instance   of  the  decision  version   of  the
+traveling salesman problem: Is there  a route of length at
+most 2000  kilometres passing through all  of Germany's 15
+largest  cities? The  answer  to  this particular  problem
+instance is of  little use for solving  other instances of
+the problem, such  as asking for a round  trip through all
+sights in  Milan whose total  length is at most  10km. For
+this  reason,  complexity theory  addresses  computational
+problems   and    not   particular    problem   instances.
+
+Representing problem instances
+
+When   considering  computational   problems,  a   problem
+instance  is  a  string  over an  alphabet.  Usually,  the
+alphabet is taken to be the binary alphabet (i.e., the set
+{0,1}),  and thus  the  strings are  bitstrings.  As in  a
+real-world  computer,  mathematical   objects  other  than
+bitstrings must be suitably encoded. For example, integers
+can be represented  in binary notation, and  graphs can be
+encoded  directly via  their  adjacency  matrices, or  via
+encoding their adjacency lists in binary. Even though some
+proofs of  complexity-theoretic theorems  regularly assume
+some concrete choice of input  encoding, one tries to keep
+the discussion  abstract enough  to be independent  of the
+choice of encoding. This can  be achieved by ensuring that
+different  representations can  be  transformed into  each
+other efficiently.
+
+Decision problems as formal languages
+
+Decision problems are one of  the central objects of study
+in computational complexity theory.  A decision problem is
+a special  type of  computational problem whose  answer is
+either yes or no, or alternately either 1 or 0. A decision
+problem  can be  viewed as  a formal  language, where  the
+members of the language are instances whose answer is yes,
+and the  non-members are  those instances whose  output is
+no.  The  objective is  to  decide,  with  the aid  of  an
+algorithm, whether a  given input string is  member of the
+formal  language  under  consideration. If  the  algorithm
+deciding  this   problem  returns  the  answer   yes,  the
+algorithm is said to accept the input string, otherwise it
+is  said to  reject the  input. An  example of  a decision
+problem is the following. The input is an arbitrary graph.
+The problem  consists in deciding whether  the given graph
+is connected, or not.  The formal language associated with
+this decision  problem is  then the  set of  all connected
+graphs—of course,  to obtain a precise  definition of this
+language,  one has  to decide  how graphs  are encoded  as
+binary strings.
+
+Function problems
+
+A  function problem  is  a computational  problem where  a
+single output (of a total  function) is expected for every
+input,  but the  output is  more  complex than  that of  a
+decision  problem,  that is,  it  isn't  just yes  or  no.
+Notable  examples include  the traveling  salesman problem
+and the  integer factorization problem. It  is tempting to
+think that the notion of  function problems is much richer
+than the notion of decision problems. However, this is not
+really the case, since function  problems can be recast as
+decision problems. For example,  the multiplication of two
+integers can be expressed as the  set of triples (a, b, c)
+such that the relation a × b = c holds. Deciding whether a
+given triple is member of  this set corresponds to solving
+the     problem     of    multiplying     two     numbers.
+
+Measuring the size of an instance
+
+To  measure  the  difficulty of  solving  a  computational
+problem,  one may  wish  to  see how  much  time the  best
+algorithm  requires to  solve  the  problem. However,  the
+running time may,  in general, depend on  the instance. In
+particular,  larger instances  will require  more time  to
+solve. Thus the  time required to solve a  problem (or the
+space  required,   or  any   measure  of   complexity)  is
+calculated as function  of the size of  the instance. This
+is usually  taken to  be the  size of  the input  in bits.
+Complexity theory  is interested  in how  algorithms scale
+with an increase  in the input size. For  instance, in the
+problem of finding whether a  graph is connected, how much
+more time does it take to solve a problem for a graph with
+2n vertices compared to the time  taken for a graph with n
+vertices? If the  input size is n, and the  time taken can
+be expressed as  a function of n. Since the  time taken on
+different inputs  of the same  size can be  different, the
+worst-case  time  complexity T(n)  is  defined  to be  the
+maximum time taken over all inputs of size n. If T(n) is a
+polynomial  in n,  then  the  algorithm is  said  to be  a
+polynomial  time algorithm.  Cobham's thesis  says that  a
+problem can be solved with  a feasible amount of resources
+if    it    admits    a   polynomial    time    algorithm.
+
+Machine models and complexity measures
+
+Turing Machine
+
+A  Turing machine  is a  mathematical model  of a  general
+computing  machine.  It  is   a  theoretical  device  that
+manipulates symbols  contained on a strip  of tape. Turing
+machines  are  not  intended   as  a  practical  computing
+technology,   but   rather   as   a   thought   experiment
+representing a computing machine. It is believed that if a
+problem  can be  solved by  an algorithm,  there exists  a
+Turing machine  which solves the problem.  Indeed, this is
+the statement of the Church–Turing thesis. Furthermore, it
+is known  that everything  that can  be computed  on other
+models of  computation known  to us today,  such as  a RAM
+machine, Conway's  Game of Life, cellular  automata or any
+programming language can be  computed on a Turing machine.
+Since Turing machines are  easy to analyze mathematically,
+and are believed  to be as powerful as any  other model of
+computation, the Turing machine  is the most commonly used
+model in complexity theory.  Many types of Turing machines
+used to  define complexity classes, such  as deterministic
+Turing    machines,    probabilistic   Turing    machines,
+non-deterministic   Turing    machines,   quantum   Turing
+machines, symmetric Turing machines and alternating Turing
+machines. They are all  equally powerful in principle, but
+when resources (such  as time or space)  are bounded, some
+of these may be more powerful than others. A deterministic
+Turing  machine is  the most  basic Turing  machine, which
+uses a fixed set of rules to determine its future actions.
+A probabilistic  Turing machine is a  deterministic Turing
+machine with an  extra supply of random  bits. The ability
+to  make probabilistic  decisions  often helps  algorithms
+solve  problems  more  efficiently.  Algorithm  which  use
+random   bits   are   called  randomized   algorithms.   A
+non-deterministic Turing machine is a deterministic Turing
+machine with  an added  feature of  non-determinism, which
+allows a  Turing machine to have  multiple possible future
+actions   from   a   given   state.  One   way   to   view
+non-determinism is  that the Turing machine  branches into
+many possible computational paths at  each step, and if it
+solves the problem in any of these branches, it is said to
+have solved the problem. Clearly,  this model is not meant
+to  be  a  physically  realizable  model,  it  is  just  a
+theoretically  interesting  abstract machine  which  gives
+rise to  particularly interesting complexity  classes. For
+examples, see nondeterministic  algorithm.
+
+Other machine models
+
+Many machine models different  from the standard multitape
+Turing machines have been  proposed in the literature, for
+example random access machines. Perhaps surprisingly, each
+of  these  models  can  be converted  to  another  without
+substantial  overhead in  time and  memory consumption.[1]
+What all these models have  in common is that the machines
+operate  deterministically.  However,  some  computational
+problems are  easier to analyze  in terms of  more unusual
+resources. For example,  a nondeterministic Turing machine
+is a computational model that  is allowed to branch out to
+check   many   different   possibilities  at   once.   The
+nondeterministic Turing machine has very little to do with
+how  we physically  want  to compute  algorithms, but  its
+branching exactly captures many of the mathematical models
+we want  to analyze,  so that  nondeterministic time  is a
+very   important  resource   in  analyzing   computational
+problems.
+
+Complexity measures
+
+For  a precise  definition of  what  it means  to solve  a
+problem  using  a  given  amount  of  time  and  space,  a
+computational  model  such  as  the  deterministic  Turing
+machine  is used.  The  time required  by a  deterministic
+Turing machine M  on input x is the total  number of state
+transitions, or  steps, the machine makes  before it halts
+and outputs the answer ("yes" or "no"). A Turing machine M
+is said to operate within  time f(n), if the time required
+by M on each input of length n is at most f(n). A decision
+problem A  can be solved  in time  f(n) if there  exists a
+Turing  machine operating  in time  f(n) which  solves the
+problem.   Since  complexity   theory  is   interested  in
+classifying  problems  based   on  their  difficulty,  one
+defines  sets  of problems  based  on  some criteria.  For
+instance, the set of problems solvable within time f(n) on
+a  deterministic   Turing  machine  is  then   denoted  by
+DTIME(f(n)). Analogous  definitions can be made  for space
+requirements.  Although  time  and   space  are  the  most
+well-known  complexity resources,  any complexity  measure
+can  be viewed  as  a  computational resource.  Complexity
+measures are very generally defined by the Blum complexity
+axioms.  Other  complexity  measures  used  in  complexity
+theory    include   communication    complexity,   circuit
+complexity,   and  decision  tree  complexity.
+
+Best, worst and average case complexity
+
+The best, worst and average case complexity refer to three
+different ways  of measuring  the time complexity  (or any
+other complexity measure) of  different inputs of the same
+size. Since some  inputs of size n may be  faster to solve
+than  others,   we  define  the   following  complexities:
+Best-case complexity:  This is  the complexity  of solving
+the  problem for  the  best input  of  size n.  Worst-case
+complexity: This is the  complexity of solving the problem
+for the  worst input  of size n.  Average-case complexity:
+This  is  the complexity  of  solving  the problem  on  an
+average. This complexity is only defined with respect to a
+probability distribution over the inputs. For instance, if
+all  inputs of  the same  size are  assumed to  be equally
+likely  to  appear, the  average  case  complexity can  be
+defined with respect to  the uniform distribution over all
+inputs of size n.  For example, consider the deterministic
+sorting algorithm  quicksort. This  solves the  problem of
+sorting a  list of integers  which is gives as  the input.
+The  best-case  scenario  is  when the  input  is  already
+sorted, and the  algorithm takes time O(n log  n) for such
+inputs.  The worst-case  is when  the input  is sorted  in
+reverse order, and the algorithm takes time O(n2) for this
+case. If we  assume that all possible  permutations of the
+input list are equally likely,  the average time taken for
+sorting is O(n log n).
+
+Upper  and  lower bounds  on  the  complexity of  problems
+
+In  order to  classify  the computation  time (or  similar
+resources, such  as space consumption), one  is interested
+in proving upper and lower bounds on the minimum amount of
+time required  by the  most efficient algorithm  solving a
+given problem.  The complexity of an  algorithm is usually
+taken to  be its  worst-case complexity,  unless specified
+otherwise.  Analyzing a  particular algorithm  falls under
+the  field of  analysis of  algorithms. To  show an  upper
+bound T(n) on the time  complexity of a problem, one needs
+to show  only that  there is  a particular  algorithm with
+running time  at most T(n). However,  proving lower bounds
+is  much  more  difficult,   since  lower  bounds  make  a
+statement about all possible algorithms that solve a given
+problem. The phrase "all possible algorithms" includes not
+just the  algorithms known  today, but any  algorithm that
+might be discovered  in the future. To show  a lower bound
+of T(n) for  a problem requires showing  that no algorithm
+can have time complexity lower  than T(n). Upper and lower
+bounds are usually stated using the big Oh notation, which
+hides constant  factors and smaller terms.  This makes the
+bounds  independent   of  the  specific  details   of  the
+computational model  used. For instance,  if T(n) =  7n2 +
+15n + 40, in big Oh notation one would write T(n) = O(n2).
+
+Defining complexity classes
+
+A  complexity  class  is  a set  of  problems  of  related
+complexity. Simpler complexity classes  are defined by the
+following factors: The type  of computational problem: The
+most  commonly   used  problems  are   decision  problems.
+However,  complexity  classes  can  be  defined  based  on
+function   problems,   counting   problems,   optimization
+problems, promise problems, etc. The model of computation:
+The most common model  of computation is the deterministic
+Turing machine,  but many complexity classes  are based on
+nondeterministic   Turing   machines,  boolean   circuits,
+quantum  Turing  machines,  monotone  circuits,  etc.  The
+resources (or  resources) that  are being bounded  and the
+bounds: These two properties  are usually stated together,
+such as "polynomial  time", "logarithmic space", "constant
+depth",  etc.  Of  course, some  complexity  classes  have
+complex definitions which do  not fit into this framework.
+Thus, a typical complexity class has a definition like the
+following:  The set  of  decision problems  solvable by  a
+deterministic  Turing  machine  within  time  f(n).  (This
+complexity class  is known  as DTIME(f(n)).)  But bounding
+the computation time above  by some concrete function f(n)
+often yields complexity classes  that depend on the chosen
+machine model. For  instance, the language {xx |  x is any
+binary  string}  can  be  solved   in  linear  time  on  a
+multi-tape  Turing   machine,  but   necessarily  requires
+quadratic  time   in  the  model  of   single-tape  Turing
+machines. If  we allow  polynomial variations  in runnning
+time,   Cobham-Edmonds  thesis   states  that   "the  time
+complexities in  any two reasonable and  general models of
+computation  are  polynomially related"  (Goldreich  2008,
+Chapter  1.2). This  forms  the basis  for the  complexity
+class P, which is the set of decision problems solvable by
+a deterministic Turing machine within polynomial time. The
+corresponding   set   of    function   problems   is   FP.
+
+
+
