@@ -16,7 +16,7 @@
 
 #include "DataBase.h"
 
-//#define SO_PORTI atoi(getenv(envp[1]))
+#define SO_PORTI atoi(getenv(envp[1]))
 #define SO_MERCI atoi(getenv(envp[2]))
 #define SO_SIZE atoi(getenv(envp[3]))
 #define SO_MIN_VITA atoi(getenv(envp[4]))
@@ -30,20 +30,13 @@
 
 
 int main (int argc, char *argv[], char *envp[]) {
-    /*Porto porti[10];*/
-    exit(0);
-    int SO_PORTI = atoi(getenv(envp[1]));
     Porto *porti = malloc(SO_PORTI * sizeof(Porto));
     int i; 
     int j; 
 	pid_t child_pid;
 	int status;
     int sem_id;
-
-    if(SO_PORTI < 4){
-        SO_PORTI = 4;
-    }
-	
+    
 	for (i = 0; i < SO_PORTI; i++){
         switch (fork())
         {

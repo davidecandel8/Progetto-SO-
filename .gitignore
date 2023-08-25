@@ -1,0 +1,6 @@
+# Eseguibili in C
+*.out
+*.exe
+
+# Cartella .vscode
+.vscode/
