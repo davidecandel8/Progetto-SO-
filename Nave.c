@@ -64,7 +64,7 @@ int main(int argc, char *argv[], char *envp[]){
     while(1){
         if(wait(NULL) == -1){
             if(errno == ECHILD){
-                puts("Processi figli Porto terminato"); /*Debug*/
+                puts("Processi figli Navi terminato"); /*Debug*/
                 break;
             } else{
                 perror("Errore nella wait");

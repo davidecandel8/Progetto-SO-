@@ -68,7 +68,7 @@ int main (int argc, char *argv[], char *envp[]) {
             porti[i].pid = getpid(); /*Assegna il valore del pid del porto*/
             porti[i].sem_id = semget(IPC_PRIVATE, 1, 0600); /*creazione del semaforo che rappresenta la banchina del porto*/
             
-            if(initSemN(porti[i].sem_id, 0, (rand() % SO_BANCHINE))<0){ /*Inizializzazione del semaforo*/
+            if(initSemN(porti[i].sem_id, 0, 2/*(rand() % SO_BANCHINE)*/)<0){ /*Inizializzazione del semaforo*/
                 perror("Errore nell'inizializzazione del semaforo");
                 fprintf(stderr, "Errore numero %d: %s\n", errno, strerror(errno)); 
                 exit(EXIT_FAILURE);
@@ -76,9 +76,15 @@ int main (int argc, char *argv[], char *envp[]) {
             
             printf("Porto numero %d, con pid %d, posizione x: %.2f, posizione y: %.2f\n", i, porti[i].pid, porti[i].x, porti[i].y); /*Debug*/
 
-            for(j=0; i<2; i++){ /*Debug*/
+            for(j=0; j<2; j++){ /*Debug*/
                 sleep(1);
                 printf("**Porto, pid: %d\n\n", getpid());
+            }
+
+            if(semctl(porti[i].sem_id, 0, IPC_RMID) < 0){ /*Tenere sotto occhio in base all'implementazione*/
+                perror("Errore nella rimozione del semaforo");
+                fprintf(stderr, "Errore numero %d: %s\n", errno, strerror(errno)); 
+                exit(EXIT_FAILURE);
             }
             
             printf("Fine figlio pid: %d\n", getpid()); /*Debug*/
@@ -101,14 +107,6 @@ int main (int argc, char *argv[], char *envp[]) {
         } 
 	}
 
-    for(j=0; j<SO_PORTI; j++){
-        if(semctl(porti[j].sem_id, 0, IPC_RMID) < 0){
-            perror("Errore nell'inizializzazione del semaforo");
-            fprintf(stderr, "Errore numero %d: %s\n", errno, strerror(errno)); 
-            exit(EXIT_FAILURE);
-        }
-    }
-    
     free(porti);
 
     puts("*******Processo Padre Porto terminato********"); /*Debug*/
