@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <sys/sysinfo.h>
+/*#include <sys/sysinfo.h>*/
 #include <sys/wait.h>
 #include <errno.h>
 #include <time.h>
@@ -36,7 +36,7 @@ int main (int argc, char *argv[], char *envp[]) {
 	pid_t child_pid;
 	int status;
     int sem_id;
-    
+
 	for (i = 0; i < SO_PORTI; i++){
         switch (fork())
         {
@@ -66,7 +66,7 @@ int main (int argc, char *argv[], char *envp[]) {
                 porti[i].y = (double)(rand() % SO_LATO);
             }
             porti[i].pid = getpid(); /*Assegna il valore del pid del porto*/
-            porti[i].sem_id = semget(IPC_PRIVATE, 1, IPC_CREAT | 0600); /*creazione del semaforo che rappresenta la banchina del porto*/
+            porti[i].sem_id = semget(IPC_PRIVATE, 1, 0600); /*creazione del semaforo che rappresenta la banchina del porto*/
             
             if(initSemN(porti[i].sem_id, 0, (rand() % SO_BANCHINE))<0){ /*Inizializzazione del semaforo*/
                 perror("Errore nell'inizializzazione del semaforo");
@@ -74,7 +74,7 @@ int main (int argc, char *argv[], char *envp[]) {
                 exit(EXIT_FAILURE);
             }
             
-            printf("Nave numero %d, con pid %d, posizione x: %.2f, posizione y: %.2f\n", i, porti[i].pid, porti[i].x, porti[i].y); /*Debug*/
+            printf("Porto numero %d, con pid %d, posizione x: %.2f, posizione y: %.2f\n", i, porti[i].pid, porti[i].x, porti[i].y); /*Debug*/
 
             for(j=0; i<2; i++){ /*Debug*/
                 sleep(1);
@@ -101,7 +101,7 @@ int main (int argc, char *argv[], char *envp[]) {
         } 
 	}
 
-    for(j=0; i<SO_PORTI; i++){
+    for(j=0; j<SO_PORTI; j++){
         if(semctl(porti[j].sem_id, 0, IPC_RMID) < 0){
             perror("Errore nell'inizializzazione del semaforo");
             fprintf(stderr, "Errore numero %d: %s\n", errno, strerror(errno)); 
@@ -111,7 +111,7 @@ int main (int argc, char *argv[], char *envp[]) {
     
     free(porti);
 
-    puts("Processo Padre Porto terminato"); /*Debug*/
+    puts("*******Processo Padre Porto terminato********"); /*Debug*/
 
 	exit(EXIT_SUCCESS);
 }

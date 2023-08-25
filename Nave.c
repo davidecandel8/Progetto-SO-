@@ -22,7 +22,7 @@ int main(int argc, char *argv[], char *envp[]){
     
     /*Creazione e attaccamento della memoria condivisa*/
     int shmid = shmget(IPC_PRIVATE, SO_NAVI * sizeof(Nave),  S_IRUSR | S_IWUSR/*IPC_CREAT*/ | 0666);
-    printf("SO_NAVI: %d, SO_CAPACITY: %d, SO_SPEED:  %d, SO_LOADSPEED: %d, SO_LATO: %d",SO_NAVI, SO_CAPACITY, SO_SPEED, SO_LOADSPEED,SO_LATO);
+    printf("SO_NAVI: %d, SO_CAPACITY: %d, SO_SPEED:  %d, SO_LOADSPEED: %d, SO_LATO: %d\n",SO_NAVI, SO_CAPACITY, SO_SPEED, SO_LOADSPEED,SO_LATO);
     
     if (shmid == -1) {
         perror("Errore nella shmget");
@@ -87,9 +87,8 @@ int main(int argc, char *argv[], char *envp[]){
         exit(EXIT_FAILURE);
     }
 
-    puts("Processo Padre Nave terminato"); /*Debug*/
+    puts("§§§§§§§§§Processo Padre Nave terminato§§§§§§§§§§"); /*Debug*/
 
     exit(EXIT_SUCCESS); 
+    /*NOTA: bisogna sincronizzare la Memoria Condivisa con dei semafori*/
 }
-
-/*NOTA: bisogna sincronizzare la Memoria Condivisa con dei semafori*/

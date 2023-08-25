@@ -209,11 +209,17 @@ int main(void){
 
 				switch(scelta){
 					case 0:/*"SO_NAVI":*/
-						strcat(parametro[0], strtok(NULL, "="));
+						token = strtok(NULL, "=");
+						if(atoi(token) < 1) /*Forza il valore di  SO_NAVI a un minimo di 1*/
+							sprintf(token, "1");
+						strcat(parametro[0], token);
 						count++;
 						break;
 					case 1:/*"SO_PORTI":*/
-						strcat(parametro[1], strtok(NULL, "="));
+						token = strtok(NULL, "=");
+						if(atoi(token) < 4) /*Forza il valore di  SO_PORTI a un minimo di 4*/
+							sprintf(token, "4");
+						strcat(parametro[1], token);
 						count++;
 						break;
 					case 2:/*"SO_MERCI":*/
@@ -356,14 +362,14 @@ int main(void){
     }
 	for(j=0; j<2; j++){ /*Debug*/
         sleep(1);
-        printf("**Nave, pid: %d\n\n", getpid());
+        printf("**Master, pid: %d\n\n", getpid());
     }
 
 
 	while (1){
         if((wait(NULL)) == -1){
             if (errno == ECHILD){
-				printf("Fine figlio Master pid: %d\n", getpid()); /*Debug*/
+				printf("Fine figli del Master, pid Master: %d\n", getpid()); /*Debug*/
                 break;
             }else{
                 puts("Ci è stato un errore nella wait");
