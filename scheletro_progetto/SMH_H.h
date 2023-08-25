@@ -16,13 +16,13 @@
 #define N_PANCHINE 2
 #define N_Navi 4
 
-// Memoria condivisa
+/* Memoria condivisa*/
 typedef struct _porto{
     int pid;
     int sem_id;
 }Porto;
 
-// Metodi per i semafori
+/*Metodi per i semafori*/
 union semun {
 	int              val;    /* Value for SETVAL */
 	struct semid_ds *buf;    /* Buffer for IPC_STAT, IPC_SET */
@@ -31,25 +31,25 @@ union semun {
 				    (Linux-specific) */
 };
 
-// Inizializza semaphore a 1 (i.e., "disponibile")
+/*Inizializza semaphore a 1 (i.e., "disponibile")*/
 int initSemAvailable(int semId, int semNum) {
     union semun arg;
     arg.val = 1;
     return semctl(semId, semNum, SETVAL, arg);
 }
-// Inizializza semaphore a 0 (i.e., "in uso")
+/*Inizializza semaphore a 0 (i.e., "in uso")*/
 int initSemInUse(int semId, int semNum) {
     union semun arg;
     arg.val = 0;
     return semctl(semId, semNum, SETVAL, arg);
 }
-// Inizializza semaphore a n (elementi)
+/*Inizializza semaphore a n (elementi)*/
 int initSemN(int semId, int semNum, int n) {
     union semun arg;
     arg.val = n;
     return semctl(semId, semNum, SETVAL, arg);
 }
-// Riservare semaphore - decrementa di 1
+/*Riservare semaphore - decrementa di 1*/
 int reserveSem(int semId, int semNum) {
     struct sembuf sops;
     sops.sem_num = semNum;
@@ -57,7 +57,7 @@ int reserveSem(int semId, int semNum) {
     sops.sem_flg = 0;
     return semop(semId, &sops, 1);
 }
-// Rilascia semaphore - incrementa di 1
+/*Rilascia semaphore - incrementa di 1*/
 int releaseSem(int semId, int semNum) {
     struct sembuf sops;
     sops.sem_num = semNum;

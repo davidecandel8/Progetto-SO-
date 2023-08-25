@@ -25,10 +25,10 @@ int main(void){
 	char *token; /*usiamo questa varibiale per puntare la meta stringhe prima dell'uguale es. (SO_NAVI=12) token -> SO_NAVI*/
 	
 	/*in questo modo possiamo usare 12 cifre dopo l'uguale. (Considerando la stringa più lunga)*/
-	char parametro[16][30] = {"SO_NAVI=", "SO_PORTI=", "SO_MERCI=", "SO_SIZE=", "SO_MIN_VITA=", "SO_MAX_VITA=", "SO_LATO=", "SO_SPEED=", "SO_CAPACITY=", "SO_BANCHINE=", "SO_FILL=", "SO_LOADSPPED=", "SO_DAYS=", "SO_STORM_DURATION=", "SO_SWELL_DURATION=", "SO_MAELSTROM="};
+	char parametro[16][30] = {"SO_NAVI=", "SO_PORTI=", "SO_MERCI=", "SO_SIZE=", "SO_MIN_VITA=", "SO_MAX_VITA=", "SO_LATO=", "SO_SPEED=", "SO_CAPACITY=", "SO_BANCHINE=", "SO_FILL=", "SO_LOADSPEED=", "SO_DAYS=", "SO_STORM_DURATION=", "SO_SWELL_DURATION=", "SO_MAELSTROM="};
 	
 	/*Questa stringhe sono FINAL (Costanti), il valore al loro interno non è modificabile, li usiamo per il confronto tra le stringhe.*/
-	char *n_parametro[] = {"SO_NAVI", "SO_PORTI", "SO_MERCI", "SO_SIZE", "SO_MIN_VITA", "SO_MAX_VITA", "SO_LATO", "SO_SPEED", "SO_CAPACITY", "SO_BANCHINE", "SO_FILL", "SO_LOADSPPED", "SO_DAYS", "SO_STORM_DURATION", "SO_SWELL_DURATION", "SO_MAELSTROM"};
+	char *n_parametro[] = {"SO_NAVI", "SO_PORTI", "SO_MERCI", "SO_SIZE", "SO_MIN_VITA", "SO_MAX_VITA", "SO_LATO", "SO_SPEED", "SO_CAPACITY", "SO_BANCHINE", "SO_FILL", "SO_LOADSPEED", "SO_DAYS", "SO_STORM_DURATION", "SO_SWELL_DURATION", "SO_MAELSTROM"};
 
 	/*Passaggio parametri di configurazione*/
 	
@@ -37,7 +37,7 @@ int main(void){
 	char buffer[SIZE]; /*Conterra le stringhe del file di configurazione.*/
 	int temp;
 	int scelta = IGNORE;
-	int i = 0, indice = 0;
+	int i = 0, indice = 0, j;
 
 	char *envVec[17]; /*Array di puntatori che punta alle  variabili del parametro che verra passato al execve come variabile d'ambiente.*/
 	envVec[0] = parametro[0]; /*SO_NAVI*/
@@ -285,7 +285,7 @@ int main(void){
 				puts("Errore: manuale\n");
 				exit(0);
 			}
-            puts("Parametri di Configurazione manuale inseriti con sucesso.");
+            puts("Parametri di Configurazione manuale inseriti con successo.");
 	}
 	fclose(fd);
 	
@@ -325,11 +325,11 @@ int main(void){
 		
         if(i == 0){
 			sleep(1);
-			errExec = execve("./porto", argVec, envVec);
+			errExec = execve("./Nave", argVec, envVec);
 			printf("sono il processo navi, PID: %d, ci è stato un errore durante execve\n", getpid());
 		}else if(i == 1){
 			sleep(1);
-			errExec = execve("./navi", argVec, envVec);
+			errExec = execve("./Porto", argVec, envVec);
 			printf("sono il processo porto, PID: %d, ci è stato un errore durante execve\n", getpid());
 		}
 
@@ -354,13 +354,18 @@ int main(void){
 		}
 		exit(EXIT_FAILURE);
     }
+	for(j=0; j<2; j++){ /*Debug*/
+        sleep(1);
+        printf("**Nave, pid: %d\n\n", getpid());
+    }
 
 
 	while (1){
         if((wait(NULL)) == -1){
-            if (errno == ECHILD)
+            if (errno == ECHILD){
+				printf("Fine figlio Master pid: %d\n", getpid()); /*Debug*/
                 break;
-            else{
+            }else{
                 puts("Ci è stato un errore nella wait");
                 return 1;
   		        /*printf("Il processo appena terminato è: %d\n", childPid);*/
@@ -369,7 +374,7 @@ int main(void){
     }
 
 
-	printf("Questo è il process id di navi: %d, questo invece di porto: %d e questo è il mio %d\n", procPidN, procPidP, getpid());
-    puts("Processi terminati con sucesso");
-	exit(EXIT_SUCCESS);
+	printf("Questo è il process id di navi: %d, questo invece di porto: %d e questo è il mio %d\n", procPidN, procPidP, getpid()); /*Debug*/
+    puts("Processi terminati con successo"); /*Debug*/
+	return 0;
 }

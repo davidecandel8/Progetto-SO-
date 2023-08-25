@@ -7,33 +7,30 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/types.h>
+#include "DataBase.h"
 
-#define SO_NAVI 10
-#define SO_CAPACITY 10 
-#define SO_SPEED  500
-#define SO_LOADSPEED 200
-#define SO_LATO 1000
+#define SO_NAVI atoi(getenv(envp[0])) 
+#define SO_CAPACITY atoi(getenv(envp[8])) 
+#define SO_SPEED  atoi(getenv(envp[7]))
+#define SO_LOADSPEED atoi(getenv(envp[11]))
+#define SO_LATO atoi(getenv(envp[6]))
 
-size_t pidNavi; 
-struct Nave *navi; 
-int i; 
-
-struct Nave{
-    int pid; 
-    double x; 
-    double y; 
-}; 
-
-int main(){
+int main(int argc, char *argv[], char *envp[]){
+    size_t pidNavi; 
+    Nave *navi; 
+    int i, j; 
+    
     /*Creazione e attaccamento della memoria condivisa*/
-    int shmid = shmget(IPC_PRIVATE, SO_NAVI * sizeof(struct Nave), IPC_CREAT | 0666);
+    int shmid = shmget(IPC_PRIVATE, SO_NAVI * sizeof(Nave),  S_IRUSR | S_IWUSR/*IPC_CREAT*/ | 0666);
+    printf("SO_NAVI: %d, SO_CAPACITY: %d, SO_SPEED:  %d, SO_LOADSPEED: %d, SO_LATO: %d",SO_NAVI, SO_CAPACITY, SO_SPEED, SO_LOADSPEED,SO_LATO);
+    
     if (shmid == -1) {
         perror("Errore nella shmget");
         fprintf(stderr, "Errore numero %d: %s\n", errno, strerror(errno)); 
         exit(EXIT_FAILURE);
     }
 
-    navi = (struct Nave *)shmat(shmid, NULL, 0);
+    navi = (Nave *)shmat(shmid, NULL, 0);
     if (navi == (void *)-1) {
         perror("Errore nell'attaccamento alla memoria condivisa");
         fprintf(stderr, "Errore numero %d: %s\n", errno, strerror(errno)); 
@@ -53,6 +50,13 @@ int main(){
                 navi[i].x = (double)(rand() % SO_LATO);
                 navi[i].y = (double)(rand() % SO_LATO);
                 printf("Nave numero %d, con pid %d, posizione x: %.2f, posizione y: %.2f\n", i, navi[i].pid, navi[i].x, navi[i].y);
+                
+                for(j=0; j<2; j++){ /*Debug*/
+                    sleep(1);
+                    printf("**Nave, pid: %d\n\n", getpid());
+                }
+            
+                printf("Fine figlio pid: %d\n", getpid()); /*Debug*/
                 exit(EXIT_SUCCESS); 
         }
     }
@@ -60,6 +64,7 @@ int main(){
     while(1){
         if(wait(NULL) == -1){
             if(errno == ECHILD){
+                puts("Processi figli Porto terminato"); /*Debug*/
                 break;
             } else{
                 perror("Errore nella wait");
@@ -81,6 +86,8 @@ int main(){
         fprintf(stderr, "Errore numero %d: %s\n", errno, strerror(errno)); 
         exit(EXIT_FAILURE);
     }
+
+    puts("Processo Padre Nave terminato"); /*Debug*/
 
     exit(EXIT_SUCCESS); 
 }

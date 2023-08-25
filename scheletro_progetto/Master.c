@@ -45,7 +45,7 @@ int main (void) {
         printf("Errore in semget Master");
         exit(EXIT_FAILURE);
     }
-  
+    
     sprintf(text,"%d",MC_PORTI); // il numero preso da MC_PORTI viene trasformato in una stringa
             // per essere inviato al processo ./porto e ./navi
     char* args[] = {
