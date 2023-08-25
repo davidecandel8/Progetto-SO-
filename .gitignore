@@ -1,6 +1,5 @@
-# Eseguibili in C
-*.out
-*.exe
-
-# Cartella .vscode
 .vscode/
+
+*/bin
+*/build
+*/src/unity*
