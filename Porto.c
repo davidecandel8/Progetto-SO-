@@ -16,26 +16,24 @@
 
 #include "DataBase.h"
 
-#define SO_PORTI atoi(getenv(envp[1]))
-#define SO_MERCI atoi(getenv(envp[2]))
-#define SO_SIZE atoi(getenv(envp[3]))
-#define SO_MIN_VITA atoi(getenv(envp[4]))
-#define SO_MAX_VITA atoi(getenv(envp[5]))
-#define SO_LATO atoi(getenv(envp[6]))
-#define SO_BANCHINE atoi(getenv(envp[9]))
-#define SO_FILL atoi(getenv(envp[10])) 
-#define SO_LOADSPEED atoi(getenv(envp[11]))
-#define SO_DAYS atoi(getenv(envp[12]))
-
-
-
 int main (int argc, char *argv[], char *envp[]) {
-    Porto *porti = malloc(SO_PORTI * sizeof(Porto));
     int i; 
     int j; 
 	pid_t child_pid;
 	int status;
     int sem_id;
+
+    int SO_PORTI = atoi(convVal(envp[1]));
+    int SO_MERCI = atoi(convVal(envp[2]));
+    int SO_SIZE = atoi(convVal(envp[3]));
+    int SO_MIN_VITA = atoi(convVal(envp[4]));
+    int SO_MAX_VITA = atoi(convVal(envp[5]));
+    int SO_LATO = atoi(convVal(envp[6]));
+    int SO_BANCHINE  = atoi(convVal(envp[9]));
+    int SO_FILL = atoi(convVal(envp[10])); 
+    int SO_LOADSPEED = atoi(convVal(envp[11]));
+    int SO_DAYS = atoi(convVal(envp[12]));
+    Porto *porti = malloc(SO_PORTI * sizeof(Porto));
 
 	for (i = 0; i < SO_PORTI; i++){
         switch (fork())

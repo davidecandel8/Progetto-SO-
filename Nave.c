@@ -9,16 +9,16 @@
 #include <sys/types.h>
 #include "DataBase.h"
 
-#define SO_NAVI atoi(getenv(envp[0])) 
-#define SO_CAPACITY atoi(getenv(envp[8])) 
-#define SO_SPEED  atoi(getenv(envp[7]))
-#define SO_LOADSPEED atoi(getenv(envp[11]))
-#define SO_LATO atoi(getenv(envp[6]))
-
 int main(int argc, char *argv[], char *envp[]){
     size_t pidNavi; 
     Nave *navi; 
     int i, j; 
+
+    int SO_NAVI = atoi(convVal(envp[0]));
+    int SO_CAPACITY = atoi(convVal(envp[8]));  
+    int SO_SPEED = atoi(convVal(envp[7])); 
+    int SO_LOADSPEED = atoi(convVal(envp[11]));
+    int SO_LATO = atoi(convVal(envp[6]));
     
     /*Creazione e attaccamento della memoria condivisa*/
     int shmid = shmget(IPC_PRIVATE, SO_NAVI * sizeof(Nave),  S_IRUSR | S_IWUSR/*IPC_CREAT*/ | 0666);
