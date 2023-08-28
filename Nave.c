@@ -7,12 +7,15 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/types.h>
+#include <sys/msg.h>
 #include "DataBase.h"
 
 int main(int argc, char *argv[], char *envp[]){
-    size_t pidNavi; 
+    size_t pidNavi;
+    mes messaggio;
     Nave *navi; 
-    int i, j; 
+    int i, j;
+    int m_id; 
 
     int SO_NAVI = atoi(convVal(envp[0]));
     int SO_CAPACITY = atoi(convVal(envp[8]));  
@@ -22,12 +25,16 @@ int main(int argc, char *argv[], char *envp[]){
     
     /*Creazione e attaccamento della memoria condivisa*/
     int shmid = shmget(IPC_PRIVATE, SO_NAVI * sizeof(Nave),  S_IRUSR | S_IWUSR/*IPC_CREAT*/ | 0666);
-    printf("SO_NAVI: %d, SO_CAPACITY: %d, SO_SPEED:  %d, SO_LOADSPEED: %d, SO_LATO: %d\n",SO_NAVI, SO_CAPACITY, SO_SPEED, SO_LOADSPEED,SO_LATO);
     
     if (shmid == -1) {
         perror("Errore nella shmget");
         fprintf(stderr, "Errore numero %d: %s\n", errno, strerror(errno)); 
         exit(EXIT_FAILURE);
+    }
+
+    if((m_id = msgget(KEY_MASTER_N_P, 0644)) < 0){ 
+        puts("errore! Non esiste la coda del key specificato: Master-Nave");
+        exit(1);
     }
 
     navi = (Nave *)shmat(shmid, NULL, 0);
@@ -60,6 +67,41 @@ int main(int argc, char *argv[], char *envp[]){
                 exit(EXIT_SUCCESS); 
         }
     }
+
+    while(1){ /*Geestione coda di messaggi*/
+
+        if(msgrcv(m_id, &messaggio, (sizeof(messaggio)-sizeof(long))/*size*/, 0, 0)<0){ //IPC_NOWAIT
+            puts("msgrcv error  Master-Nave");
+            exit(1);
+        }
+
+        if(messaggio.mtype == 11){
+            puts("Ricevuto messaggio di fine");
+            break;
+        }
+
+        
+        if(messaggio.mes_s.pid < 0){
+            puts("il pid passato non è valido");
+            exit(1);
+        }
+
+        messaggio.mtype = messaggio.mes_s.pid; /*In modo tale che il client elabori solo i messagii indirizzati a lui*/
+      
+        if((messaggio.mes_s.val % 2) == 0){ 
+            strcpy(messaggio.mes_s.mtext, "Pari"); /*sprintf(messaggio.mtext, "Pari");*/
+        }else
+            strcpy(messaggio.mes_s.mtext, "Dispari"); /*sprintf(messaggio.mtext, "Parco giochi");*/
+    
+
+        if(msgsnd(m_id, &messaggio, (sizeof(messaggio)-sizeof(long))/*size*/, IPC_NOWAIT)<0){ /*mtype all'interno di messaggi è mantenuto, il mes è inviato univocalmente allo stesso processo.*/
+            puts("coda piena Master-Nave");
+            exit(1);
+        }
+
+        /*puts("Finitoooooo, sono il processo figlio"); */
+        
+  }
 
     while(1){
         if(wait(NULL) == -1){

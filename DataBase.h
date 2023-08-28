@@ -10,6 +10,20 @@
 #include <sys/stat.h>
 #include <sys/sem.h>
 
+#define KEY_MASTER_N_P 5
+#define size 50
+
+typedef struct mes_struct{
+  int val;
+  int pid;
+  char mtext[size];
+}m_struct;
+
+typedef struct _mymsg{
+  long mtype;
+  m_struct mes_s;
+}mes;
+
 /* Memoria condivisa */
 typedef struct _porto{
     int pid;
@@ -25,12 +39,12 @@ char *convVal(char* val){
 }
 
 /* Metodi per i semafori*/
-union semun {
-	int              val;    /* Value for SETVAL*/
-	struct semid_ds *buf;    /* Buffer for IPC_STAT, IPC_SET*/
-	unsigned short  *array;  /* Array for GETALL, SETALL*/
-	struct seminfo  *__buf;  /* Buffer for IPC_INFO  (Linux-specific)*/ 
-};
+/*union semun {
+	int              val;    /* Value for SETVAL
+	struct semid_ds *buf;    /* Buffer for IPC_STAT, IPC_SET
+	unsigned short  *array;  /* Array for GETALL, SETALL
+	struct seminfo  *__buf;  /* Buffer for IPC_INFO  (Linux-specific)
+};*/
 
 typedef union _id{ /*Identificatore per la merce*/
     int intero;

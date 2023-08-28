@@ -2,6 +2,7 @@
 #include <sys/types.h> /*Per pid_t (rinomina del tipo int)*/
 #include <unistd.h> /*Per la getpid() / execve()*/
 #include <sys/wait.h>
+#include <sys/msg.h>
 #include <errno.h>
 #include <string.h>
 
@@ -14,15 +15,22 @@
 
 #include <stdarg.h>
 #include <stdlib.h> /* Def. per la exit() / EXIT_SUCCESS / EXIT_FAILURE */
+#include "DataBase.h"
 
 int main(void){
 	pid_t procPid, procPidN, procPidP/*, childPid*/;
+	int m_id;
 	int errExec = 0;
 	int count = 0; /*Se siamo in mod. manuale (per l'assegnazione), dice se è stato assegnato un valore a tutti i campi.*/
 	int manuale = 0; /*Ci dice che tipo di assegnazione stiamo facendo, ovviamente 0 sta per manuale disattivato*/
 	char *f_stringa;
 	char *argVec[] = {"navi", NULL}; /*Prova che non serve a nulla. (penso)*/
 	char *token; /*usiamo questa varibiale per puntare la meta stringhe prima dell'uguale es. (SO_NAVI=12) token -> SO_NAVI*/
+
+	if((m_id = msgget(KEY_MASTER_N_P, IPC_CREAT | 0600)) < 0){ /*Creazione coda di messaggi per master porto-navi*/
+    	puts("errore durante la creazione di coda di messaggi Master porto-navi!");
+    	exit(1);
+  	}
 	
 	/*in questo modo possiamo usare 12 cifre dopo l'uguale. (Considerando la stringa più lunga)*/
 	char parametro[16][30] = {"SO_NAVI=", "SO_PORTI=", "SO_MERCI=", "SO_SIZE=", "SO_MIN_VITA=", "SO_MAX_VITA=", "SO_LATO=", "SO_SPEED=", "SO_CAPACITY=", "SO_BANCHINE=", "SO_FILL=", "SO_LOADSPEED=", "SO_DAYS=", "SO_STORM_DURATION=", "SO_SWELL_DURATION=", "SO_MAELSTROM="};
@@ -379,6 +387,10 @@ int main(void){
         }
     }
 
+    if(msgctl(m_id, IPC_RMID, NULL)<0){ /*Dealoca la coda di messaggi  Master_P_N*/
+    	puts("Errore nella chiusara coda di messaggi Master_P_N");
+        return 1;
+	}
 
 	printf("Questo è il process id di navi: %d, questo invece di porto: %d e questo è il mio %d\n", procPidN, procPidP, getpid()); /*Debug*/
     puts("Processi terminati con successo"); /*Debug*/
