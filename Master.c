@@ -26,11 +26,6 @@ int main(void){
 	char *f_stringa;
 	char *argVec[] = {"navi", NULL}; /*Prova che non serve a nulla. (penso)*/
 	char *token; /*usiamo questa varibiale per puntare la meta stringhe prima dell'uguale es. (SO_NAVI=12) token -> SO_NAVI*/
-
-	if((m_id = msgget(KEY_MASTER_N_P, IPC_CREAT | 0600)) < 0){ /*Creazione coda di messaggi per master porto-navi*/
-    	puts("errore durante la creazione di coda di messaggi Master porto-navi!");
-    	exit(1);
-  	}
 	
 	/*in questo modo possiamo usare 12 cifre dopo l'uguale. (Considerando la stringa più lunga)*/
 	char parametro[16][30] = {"SO_NAVI=", "SO_PORTI=", "SO_MERCI=", "SO_SIZE=", "SO_MIN_VITA=", "SO_MAX_VITA=", "SO_LATO=", "SO_SPEED=", "SO_CAPACITY=", "SO_BANCHINE=", "SO_FILL=", "SO_LOADSPEED=", "SO_DAYS=", "SO_STORM_DURATION=", "SO_SWELL_DURATION=", "SO_MAELSTROM="};
@@ -46,8 +41,13 @@ int main(void){
 	int temp;
 	int scelta = IGNORE;
 	int i = 0, indice = 0, j;
-
 	char *envVec[17]; /*Array di puntatori che punta alle  variabili del parametro che verra passato al execve come variabile d'ambiente.*/
+
+	if((m_id = msgget(KEY_MASTER_N_P, IPC_CREAT | 0600)) < 0){ /*Creazione coda di messaggi per master porto-navi*/
+    	puts("errore durante la creazione di coda di messaggi Master porto-navi!");
+    	exit(1);
+  	}
+
 	envVec[0] = parametro[0]; /*SO_NAVI*/
 	envVec[1] = parametro[1]; /*SO_PORTO*/
 	envVec[2] = parametro[2]; /*SO_MERCI*/

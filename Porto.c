@@ -21,12 +21,15 @@
 int main (int argc, char *argv[], char *envp[]) {
     int i; 
     int j; 
+    int k; 
 	pid_t child_pid;
-    mes messaggio;
+    mes messaggio, cmPorti;
 	int status;
     int sem_id, m_id, shm_id;
+    int id_coda; 
     int n; /*Provisorio prima della sincronizzazione tra processi*/
 
+    /*Assegnamento dei parametri di configurazione*/
     int SO_PORTI = atoi(convVal(envp[1]));
     int SO_MERCI = atoi(convVal(envp[2]));
     int SO_SIZE = atoi(convVal(envp[3]));
@@ -37,12 +40,18 @@ int main (int argc, char *argv[], char *envp[]) {
     int SO_FILL = atoi(convVal(envp[10])); 
     int SO_LOADSPEED = atoi(convVal(envp[11]));
     int SO_DAYS = atoi(convVal(envp[12]));
-    /*Porto *porti = malloc(SO_PORTI * sizeof(Porto));*/
-    Porto *porti;
+
+    Porto *porti; /*Per la memoria condivasa Master porti e porti*/
 
     if((m_id = msgget(KEY_MASTER_N_P, 0644)) < 0){ /*Recupero id coda di messaggi*/
         puts("errore! Non esiste la coda del key specificato: Master-Nave");
         exit(1);
+    }
+
+    if((id_coda = msgget(IPC_PRIVATE, /*IPDC_CREAT*/ 0600))<0){
+        perror("Errore nella msgget");
+        fprintf(stderr, "Errore numero %d: %s\n", errno, strerror(errno)); 
+        exit(EXIT_FAILURE);
     }
 
     if((shm_id = shmget(IPC_PRIVATE, sizeof(Porto)*SO_PORTI, 0600)) < 0){ /*Creazione memoria condivisa*/
@@ -89,6 +98,18 @@ int main (int argc, char *argv[], char *envp[]) {
             }
             
             printf("Porto numero %d, con pid %d, posizione x: %.2f, posizione y: %.2f\n", i, porti[i].pid, porti[i].x, porti[i].y); /*Debug*/
+            
+            /* ------------------------------NEWS-------------------------------------*/
+                cmPorti.mtype = 14;
+                cmPorti.mes_s.pid = getpid(); 
+                sprintf(cmPorti.mes_s.mtext, "Messaggio dal processo porto figlio %d\n", getpid()); 
+                /*Invio del messaggio tramite coda di messaggi da parte del processo porto_figlio*/
+                if(msgsnd(id_coda, &cmPorti, sizeof(messaggio)-sizeof(long), IPC_NOWAIT)<0){
+                    perror("Errore nella msgnd");
+                    fprintf(stderr, "Errore numero %d: %s\n", errno, strerror(errno)); 
+                    exit(EXIT_FAILURE);
+                } 
+            /* ----------------------------END_NEWS----------------------------------*/
 
             if(shmdt(porti) ==-1){
                 puts("errore nelllo sganciamento. Master-Porto");
@@ -100,14 +121,23 @@ int main (int argc, char *argv[], char *envp[]) {
                 printf("**Porto, pid: %d\n\n", getpid());
             }
             
-            printf("Fine figlio pid: %d\n", getpid()); /*Debug*/
+            printf("Fine figlio pid: %d - Porto\n", getpid()); /*Debug*/
 
 		    exit(EXIT_SUCCESS);
         }
     }
 
+    for(k=0; k<SO_PORTI; k++){       
+        if (msgrcv(id_coda, &cmPorti, sizeof(messaggio)-sizeof(long), 0, 0) == -1) {
+            perror("Errore nella msgrcv - Processo porto");
+            fprintf(stderr, "Errore numero %d: %s\n", errno, strerror(errno)); 
+            exit(EXIT_FAILURE);
+        }
+        printf("Messaggio ricevuto dal processo padre-porto: \"%s\"\n", cmPorti.mes_s.mtext); 
+    } 
+
     n = 0;
-    while(1){ /*Geestione coda di messaggi*/
+    while(1){ /*Gestione coda di messaggi*/
         if(n==11){ /*Messaggio per terminare il processo di elaborazione dei messaggi*/
             messaggio.mtype = n;
             if(msgsnd(m_id, &messaggio, (sizeof(messaggio)-sizeof(long))/*size*/, IPC_NOWAIT)<0){ /*Invio richiesta.*/
@@ -153,16 +183,26 @@ int main (int argc, char *argv[], char *envp[]) {
 
     i=0;
     porti = (Porto *)shmat(shm_id,NULL,0); /*Agganciamento della memoria condivisa*/
-    while(i<SO_PORTI){ //Rimozione dei semafori
+    while(i<SO_PORTI){ /*Rimozione dei semafori*/
         if(semctl(porti[i].sem_id, 0, IPC_RMID) < 0){ /*Tenere sotto occhio in base all'implementazione*/
-            perror("Errore nella rimozione del semaforo");
+            perror("Errore nella rimozione del semaforo - Porto");
             fprintf(stderr, "Errore numero %d: %s\n", errno, strerror(errno)); 
             exit(EXIT_FAILURE);
         }
         i++;
     }
 
-    shmctl(shm_id, IPC_RMID,0); /*Dealocazione memoria condivisa*/
+    if(msgctl(id_coda, IPC_RMID, NULL)<0){ /*Dealoca la coda di messaggi  Master_N-figli*/
+    	perror("Errore nella msgctl, coda di messaggi - Porto");
+        fprintf(stderr, "Errore numero %d: %s\n", errno, strerror(errno)); 
+        exit(EXIT_FAILURE);
+	}
+
+    if(shmctl(shm_id, IPC_RMID,0)<0){ /*Dealocazione memoria condivisa*/
+        perror("Errore nella shmctl");
+        fprintf(stderr, "Errore numero %d: %s\n", errno, strerror(errno)); 
+        exit(EXIT_FAILURE);
+    }
 
     puts("*******Processo Padre Porto terminato********"); /*Debug*/
 

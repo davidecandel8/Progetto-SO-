@@ -12,11 +12,14 @@
 
 int main(int argc, char *argv[], char *envp[]){
     size_t pidNavi;
-    mes messaggio;
+    mes messaggio, cmNavi;
     Nave *navi; 
-    int i, j;
-    int m_id; 
+    int i, j, k;
+    int m_id;
 
+    int id_coda; 
+
+    /*Assegnamento dei parametri di configurazione*/
     int SO_NAVI = atoi(convVal(envp[0]));
     int SO_CAPACITY = atoi(convVal(envp[8]));  
     int SO_SPEED = atoi(convVal(envp[7])); 
@@ -35,6 +38,12 @@ int main(int argc, char *argv[], char *envp[]){
     if((m_id = msgget(KEY_MASTER_N_P, 0644)) < 0){ 
         puts("errore! Non esiste la coda del key specificato: Master-Nave");
         exit(1);
+    }
+
+    if((id_coda = msgget(IPC_PRIVATE, /*IPDC_CREAT*/ 0600))<0){
+        perror("Errore nella msgget");
+        fprintf(stderr, "Errore numero %d: %s\n", errno, strerror(errno)); 
+        exit(EXIT_FAILURE);
     }
 
     navi = (Nave *)shmat(shmid, NULL, 0);
@@ -62,24 +71,44 @@ int main(int argc, char *argv[], char *envp[]){
                     sleep(1);
                     printf("**Nave, pid: %d\n\n", getpid());
                 }
-            
-                printf("Fine figlio pid: %d\n", getpid()); /*Debug*/
+
+                cmNavi.mtype = 15;
+                cmNavi.mes_s.pid = getpid(); 
+                sprintf(cmNavi.mes_s.mtext, "Messaggio dal processo nave figlio %d\n", getpid()); 
+                /*Invio del messaggio tramite coda di messaggi da parte del processo nave_figlio*/
+                if(msgsnd(id_coda, &cmNavi, sizeof(messaggio)-sizeof(long), IPC_NOWAIT)<0){
+                    perror("Errore nella msgnd - NAVE");
+                    fprintf(stderr, "Errore numero %d: %s\n", errno, strerror(errno)); 
+                    exit(EXIT_FAILURE);
+                } 
+
+                printf("Fine figlio pid: %d - Nave\n", getpid()); /*Debug*/
                 exit(EXIT_SUCCESS); 
         }
     }
 
+    /* Padre deve attendere di leggere tutti i messaggi inviati dai figli */
+
+    for(k=0; k<SO_NAVI; k++){       
+        if (msgrcv(id_coda, &cmNavi, sizeof(messaggio)-sizeof(long), 0, 0) == -1) {
+            perror("Errore nella msgrcv - Processo Nave");
+            fprintf(stderr, "Errore numero %d: %s\n", errno, strerror(errno)); 
+            exit(EXIT_FAILURE);
+        }
+        printf("Messaggio ricevuto dal processo padre-Nave: \"%s\"\n", cmNavi.mes_s.mtext); 
+    } 
+
     while(1){ /*Geestione coda di messaggi*/
 
-        if(msgrcv(m_id, &messaggio, (sizeof(messaggio)-sizeof(long))/*size*/, 0, 0)<0){ //IPC_NOWAIT
+        if(msgrcv(m_id, &messaggio, (sizeof(messaggio)-sizeof(long))/*size*/, 0, 0)<0){ /*IPC_NOWAIT*/
             puts("msgrcv error  Master-Nave");
             exit(1);
         }
-
+        
         if(messaggio.mtype == 11){
             puts("Ricevuto messaggio di fine");
             break;
         }
-
         
         if(messaggio.mes_s.pid < 0){
             puts("il pid passato non è valido");
@@ -93,7 +122,6 @@ int main(int argc, char *argv[], char *envp[]){
         }else
             strcpy(messaggio.mes_s.mtext, "Dispari"); /*sprintf(messaggio.mtext, "Parco giochi");*/
     
-
         if(msgsnd(m_id, &messaggio, (sizeof(messaggio)-sizeof(long))/*size*/, IPC_NOWAIT)<0){ /*mtype all'interno di messaggi è mantenuto, il mes è inviato univocalmente allo stesso processo.*/
             puts("coda piena Master-Nave");
             exit(1);
@@ -102,7 +130,7 @@ int main(int argc, char *argv[], char *envp[]){
         /*puts("Finitoooooo, sono il processo figlio"); */
         
   }
-
+    
     while(1){
         if(wait(NULL) == -1){
             if(errno == ECHILD){
@@ -116,15 +144,21 @@ int main(int argc, char *argv[], char *envp[]){
         }
     }
 
+    if(msgctl(id_coda, IPC_RMID, NULL)<0){ /*Dealoca la coda di messaggi  Master_N-figli*/
+    	perror("Errore nella msgctl, coda di messaggi - Processo Nave");
+        fprintf(stderr, "Errore numero %d: %s\n", errno, strerror(errno)); 
+        exit(EXIT_FAILURE);
+	}
+
     /*Detach e rimozione della memoria condivisa*/
     if(shmdt(navi) == -1){
-        perror("Errore nel detach della memoria condivisa");
+        perror("Errore nel detach della memoria condivisa - Processo Nave ");
         fprintf(stderr, "Errore numero %d: %s\n", errno, strerror(errno)); 
         exit(EXIT_FAILURE);
     }
 
     if(shmctl(shmid, IPC_RMID, NULL) == -1){
-        perror("Errore nella rimozione della memoria condivisa");
+        perror("Errore nella rimozione della memoria condivisa - Processo Nave");
         fprintf(stderr, "Errore numero %d: %s\n", errno, strerror(errno)); 
         exit(EXIT_FAILURE);
     }
