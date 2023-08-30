@@ -17,6 +17,118 @@
 
 
 #include "DataBase.h"
+/*devo fare la free del merci che alloco?*/
+merci* creazione_merce(int SO_MERCI, int SO_SIZE, int SO_MIN_VITA, int SO_MAX_VITA, int SO_DAYS){
+    int i; 
+    merci* array_merci = (merci*)malloc(sizeof(merci) * SO_MERCI); 
+    srand(time(NULL));
+
+    for(i=0; i<SO_MERCI; i++){
+        array_merci[i].indice_merce = i; 
+        array_merci[i].vita = rand() % (SO_MAX_VITA - SO_MIN_VITA + 1) + SO_MIN_VITA;
+        array_merci[i].ton = rand() % SO_SIZE + 1;
+    }
+
+    for(i=0; i<SO_MERCI; i++){
+        printf("La merce numero %d ha una durati di %d giorni e ogni suo lotto pesa %d kg\n", array_merci[i].indice_merce, array_merci[i].vita, array_merci[i].ton); 
+    }
+
+    return array_merci; 
+}
+
+int * trova_merci_disponibili(int SO_MERCI, int SO_FILL, int merce_distribuita, merci* array_merci){
+    int * merci_possibili; 
+    int cont; 
+    int i, j, k; 
+    int * indici; 
+
+    printf("\n\nEntrati in trova_merci_disponibili\n"); 
+    cont = 0; 
+    merci_possibili = malloc(sizeof(int) * SO_MERCI); 
+
+    for(i=0; i<SO_MERCI; i++){
+        if((SO_FILL-merce_distribuita)-array_merci[i].ton >= 0)
+            cont++; 
+    }
+    printf("Le merci disponibili sono: %d\n", cont); 
+    indici = malloc(sizeof(int)*(cont+1)); 
+    k=0; 
+    for(j=0; j<SO_MERCI; j++){
+        printf("Il valore nel ciclo numero %d della condizione è %d\n", j, (SO_FILL-merce_distribuita)-array_merci[j].ton);
+        if((SO_FILL-merce_distribuita)-array_merci[j].ton >= 0){
+            indici[k] = j; 
+            k++; 
+        }
+    }
+    indici[cont] = -1; 
+    for(j=0; j<cont; j++){
+        printf("%d - valore: %d\n", j, indici[j]); 
+    }
+    printf("Usciti da trova_merci_disponibili\n\n"); 
+    return indici; 
+}
+int lunghezza_array(int* merci_possibili){
+    int lunghezza=0; 
+    while(merci_possibili[lunghezza]!=-1)
+        lunghezza++; 
+    return lunghezza; 
+}
+
+void distribuzioni_merci(int SO_PORTI, int SO_MERCI, int SO_FILL, int shm_id, merci* array_merci){
+    Porto * porti; 
+    int i, j; 
+    int m; 
+    int merce_distribuita; 
+    int * merci_possibili; 
+    int cont_merci_possibili; 
+    int ind_porto; 
+    int ind_merce;
+    int lotti; 
+
+    srand(time(NULL));
+    porti = (Porto *)shmat(shm_id,NULL,0); /*Agganciamento della memoria condivisa*/
+    merci_possibili = malloc(sizeof(int) * SO_MERCI); 
+
+    /*rimozione dei valori sporchi*/
+    printf("Rimozione dei valori sporchi nell'array merci_possibili\n"); 
+    for(i=0; i<SO_MERCI; i++){
+        merci_possibili[i] = 0; 
+        printf("%d: il valore deve essere 0: %d\n", i, merci_possibili[i]); 
+    }
+
+    merce_distribuita = 0;
+    merci_possibili = trova_merci_disponibili(SO_MERCI, SO_FILL, merce_distribuita, array_merci);  
+    cont_merci_possibili = lunghezza_array(merci_possibili); 
+    printf("Le merci disponibili attuali sono %d\n", cont_merci_possibili);
+    while(cont_merci_possibili!=0 && cont_merci_possibili<=SO_MERCI && merce_distribuita<=SO_FILL){
+        /*estrattore casuale di indice porto*/ 
+        ind_porto = rand() % SO_PORTI; 
+        printf("Indice porto estratto: %d\n", ind_porto); 
+        /*estrattore casuale di indice merci fra le merci possibili*/
+        m = rand() % cont_merci_possibili;
+        printf("Indice m estratto: %d\n", m); 
+        ind_merce = merci_possibili[m];
+        printf("Indice merce: %d\n", ind_merce); 
+        /*estrattore casuale di lotti dalle tonnellate dispobili*/
+        lotti = rand() % (((SO_FILL-merce_distribuita)/array_merci[ind_merce].ton)+1); 
+        printf("Lotti estratti: %d\n", lotti); 
+        /*scrivo la quantità di lotti all'interno del porto*/
+        porti[ind_porto].offerta[ind_merce] += lotti;
+        printf("Nel porto %d, per la merce %d, ci sono %d lotti\n", ind_porto, ind_merce, porti[ind_porto].offerta[ind_merce]); 
+        /*incrementiamo la merce piazzata*/
+        merce_distribuita += lotti*array_merci[ind_merce].ton; 
+        merci_possibili = trova_merci_disponibili(SO_MERCI, SO_FILL, merce_distribuita, array_merci); 
+        cont_merci_possibili = lunghezza_array(merci_possibili); 
+        printf("Le merci disponibili attuali sono %d\n", cont_merci_possibili);
+    }
+
+    for(i=0; i<SO_PORTI; i++){
+        printf("Il porto %d che ha il pid %d e che si trova in posizione %f x e %f y, ora ha le seguenti al suo interno: \n", i, porti[i].pid, porti[i].x, porti[i].y);
+        for(j=0; j<SO_MERCI; j++){
+            printf("La merce %d è presente in %d lotti\n", j, porti[i].offerta[j]);
+        } 
+    }
+}
 
 int main (int argc, char *argv[], char *envp[]) {
     int i; 
@@ -28,6 +140,8 @@ int main (int argc, char *argv[], char *envp[]) {
     int sem_id, m_id, shm_id;
     int id_coda; 
     int n; /*Provisorio prima della sincronizzazione tra processi*/
+
+    merci * array_merci; 
 
     /*Assegnamento dei parametri di configurazione*/
     int SO_PORTI = atoi(convVal(envp[1]));
@@ -112,7 +226,7 @@ int main (int argc, char *argv[], char *envp[]) {
             /* ----------------------------END_NEWS----------------------------------*/
 
             if(shmdt(porti) ==-1){
-                puts("errore nelllo sganciamento. Master-Porto");
+                puts("errore nello sganciamento. Master-Porto");
                 exit(1);
             }
 
@@ -126,6 +240,12 @@ int main (int argc, char *argv[], char *envp[]) {
 		    exit(EXIT_SUCCESS);
         }
     }
+
+    printf("\n\n\n\n\n\n");
+    /*creazione, smistamento merci, richieste e offerte*/
+    array_merci = creazione_merce(SO_MERCI, SO_SIZE, SO_MIN_VITA, SO_MAX_VITA, SO_DAYS); 
+    distribuzioni_merci(SO_PORTI, SO_MERCI, SO_FILL, shm_id, array_merci); 
+    printf("\n\n\n\n\n\n");
 
     for(k=0; k<SO_PORTI; k++){       
         if (msgrcv(id_coda, &cmPorti, sizeof(messaggio)-sizeof(long), 0, 0) == -1) {

@@ -12,6 +12,11 @@
 
 #define KEY_MASTER_N_P 5
 #define size 50
+#define SO_MERCI1 10 
+/*
+    problema da risolvere su come passare al file database.h SO_MERCI --> soluzione più facile ma meno elegante 
+    è quella di esportare direttamente in Porto.c la struct porto
+*/
 
 typedef struct mes_struct{
   int val;
@@ -30,7 +35,15 @@ typedef struct _porto{
     int sem_id;
     double x; 
     double y; 
+    int offerta [SO_MERCI1]; /*quantità di merce offerta da un determinato porto in lotti*/
+    int richiesta [SO_MERCI1]; /*quantità di merce richiesta da un determinato porto in lotti*/
 }Porto;
+
+typedef struct _merci{
+    int indice_merce; /*indice della merce*/ 
+    int vita; /*data di scadenza*/
+    int ton; /*quantita di merce per lotto (in ton)*/
+}merci;
 
 /*Equivale a usare  envp: questo per la portabilità  in sistemi come linux*/
 char *convVal(char* val){ 
